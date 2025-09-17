@@ -1,0 +1,17 @@
+otelcol.receiver.otlp "default" {
+  grpc { endpoint = "0.0.0.0:4317" }
+  http { endpoint = "0.0.0.0:4318" }
+  output {
+    logs = [otelcol.processor.batch.default.input]
+  }
+}
+
+otelcol.processor.batch "default" {
+  output {
+    logs = [otelcol.exporter.debug.pretty.input]
+  }
+}
+
+otelcol.exporter.debug "pretty" {
+  verbosity = "detailed"
+}

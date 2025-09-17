@@ -1,0 +1,54 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "OTLP PoC: Up",
+      "type": "shell",
+      "command": "powershell",
+      "args": ["-ExecutionPolicy","Bypass","-File","${workspaceFolder}/scripts/up.ps1"],
+      "problemMatcher": []
+    },
+    {
+      "label": "OTLP PoC: Up (tail)",
+      "type": "shell",
+      "command": "powershell",
+      "args": ["-ExecutionPolicy","Bypass","-File","${workspaceFolder}/scripts/up.ps1","-Tail"],
+      "problemMatcher": []
+    },
+    {
+      "label": "OTLP PoC: Tail receiver",
+      "type": "shell",
+      "command": "powershell",
+      "args": ["-NoExit","-Command","podman logs -f receiver"],
+      "presentation": { "panel": "new" },
+      "problemMatcher": []
+    },
+    {
+      "label": "OTLP PoC: Up + Tail",
+      "dependsOrder": "sequence",
+      "dependsOn": ["OTLP PoC: Up", "OTLP PoC: Tail receiver"]
+    },
+    {
+      "label": "OTLP PoC: Down",
+      "type": "shell",
+      "command": "powershell",
+      "args": ["-ExecutionPolicy","Bypass","-File","${workspaceFolder}/scripts/down.ps1"],
+      "problemMatcher": []
+    },
+    {
+      "label": "OTLP PoC: Down (kill tails)",
+      "type": "shell",
+      "command": "powershell",
+      "args": ["-ExecutionPolicy","Bypass","-File","${workspaceFolder}/scripts/down.ps1","-KillTails"],
+      "problemMatcher": []
+    },
+    {
+      "label": "OTLP PoC: Down + Prune",
+      "type": "shell",
+      "command": "powershell",
+      "args": ["-ExecutionPolicy","Bypass","-File","${workspaceFolder}/scripts/down.ps1","-KillTails","-Prune"],
+      "problemMatcher": []
+    }
+  ]
+}
+

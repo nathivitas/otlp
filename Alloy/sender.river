@@ -1,0 +1,67 @@
+// Filelog receiver: read and parse audit logs
+otelcol.receiver.filelog "audit" {
+  include  = ["/data/app.log"]
+  start_at = "beginning"
+
+  // Handle multi-line JSON entries (if they span multiple lines)
+  multiline {
+    line_start_pattern = "^\\s*\\{"
+  }
+
+  operators = [
+    // Parse JSON into body.*
+    {
+      type       = "json_parser"
+      parse_from = "body"
+
+      // Assign log timestamp from body.timestamp
+      timestamp = {
+        parse_from = "body.timestamp"
+        layout     = "%Y-%m-%dT%H:%M:%S.%fZ"
+        location   = "UTC"
+      }
+    },
+
+    // Lift nested structures into proper OTel fields
+    { type = "move", from = "body.resource",   to = "resource"   },
+    { type = "move", from = "body.attributes", to = "attributes" },
+
+    // Promote "message" to the log body
+    { type = "move", from = "body.message", to = "body" },
+
+    // Parse severity from the original field
+    { type = "severity_parser", parse_from = "body.severity" },
+
+    // Normalize log.type for filtering
+    { type = "add", field = "attributes.log.type", value = `{{ lower(attributes["log.type"]) }}` },
+  ]
+
+  output { logs = [otelcol.processor.filter.only_audit.input] }
+}
+
+// Keep only audit logs (case-insensitive)
+otelcol.processor.filter "only_audit" {
+  logs {
+    include {
+      match_type  = "expr"
+      expressions = [
+        `lower(attributes["log.type"]) == "audit"`
+      ]
+    }
+  }
+
+  output { logs = [otelcol.processor.batch.default.input] }
+}
+
+// Batch processor for efficiency
+otelcol.processor.batch "default" {
+  output { logs = [otelcol.exporter.otlp.to_receiver.input] }
+}
+
+// Export to the receiver
+otelcol.exporter.otlp "to_receiver" {
+  client {
+    endpoint = "receiver:4317"
+    tls { insecure = true }
+  }
+}
