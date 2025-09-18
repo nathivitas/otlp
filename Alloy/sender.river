@@ -30,6 +30,7 @@ otelcol.receiver.filelog "audit_only" {
 
     // 3) Parse severity (best-effort)
     { type = "severity_parser", parse_from = "body.severity", on_error = "send" },
+
   ]
 
   output { logs = [otelcol.processor.batch.default.input] }
@@ -45,3 +46,4 @@ otelcol.exporter.otlp "to_receiver" {
     tls { insecure = true }
   }
 }
+

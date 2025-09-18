@@ -176,7 +176,7 @@ Write-Host "Sample log:          $sample"   -ForegroundColor Cyan
 Write-Host "Resetting pod $PodName (if exists)..." -ForegroundColor Cyan
 & podman pod rm -f $PodName 1>$null 2>$null
 Write-Host "Creating pod $PodName (ports 4317/4318)..." -ForegroundColor Cyan
-Run-Podman @("pod","create","--name",$PodName,"-p","4317:4317","-p","4318:4318","-p","12345:12345") | Out-Null
+Run-Podman @("pod","create","--name",$PodName,"-p","4317:4317","-p","4318:4318","-p","12345:12345","-p","12346:12346") | Out-Null
 
 # --- Images (pre-pull; tolerate corp TLS via insecure fallback for PoC) ---
 Ensure-Image "docker.io/library/busybox:latest"

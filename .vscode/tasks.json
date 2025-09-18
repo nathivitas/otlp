@@ -49,6 +49,7 @@
       "args": ["-ExecutionPolicy","Bypass","-File","${workspaceFolder}/scripts/down.ps1","-KillTails","-Prune"],
       "problemMatcher": []
     }
+   
   ]
 }
 
