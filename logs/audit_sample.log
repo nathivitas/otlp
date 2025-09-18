@@ -211,7 +211,8 @@
    "attributes":{
       "db.system":"postgresql",
       "db.host":"srvdb99.apap.com.do",
-      "db.port":"5432""db.name":"mydb",
+      "db.port":"5432",
+      "db.name":"mydb",
       "db.statement":"SELECT \\* FROM users WHERE id = $1",
       "db.operation":"SELECT",
       "db.user":"dbuser",
@@ -241,7 +242,8 @@
       "event.id":"event-001",
       "event.data":{
          "userId":"user-123",
-         "email":"user@example.com""messaging.system":"rabbitmq",
+         "email":"user@example.com",
+         "messaging.system":"rabbitmq",
          "messaging.destination":"my-queue",
          "messaging.destination\\_kind":"queue",
          "messaging.protocol":"AMQP",
