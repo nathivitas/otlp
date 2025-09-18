@@ -239,8 +239,9 @@ if (-not (Wait-Running -Name "sender")) {
 # Optionally launch a tail window (resilient)
 if ($Tail.IsPresent) {
   Write-Host "Opening live tail window (receiver)..." -ForegroundColor Cyan
-  Open-Tail -Container "receiver"
+  Open-Tail -Container "sender"
 }
+
 
 # Final hints
 Write-Host ""
