@@ -1,0 +1,212 @@
+﻿kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: apap-alloy
+  namespace: grafana-stack-qa
+  uid: a0923c51-9cad-4f7e-925e-355861cf00d6
+  resourceVersion: '1819647421'
+  creationTimestamp: '2024-12-20T13:59:52Z'
+  labels:
+    app.kubernetes.io/component: config
+    app.kubernetes.io/instance: apap-alloy
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: alloy
+    app.kubernetes.io/part-of: alloy
+    app.kubernetes.io/version: v1.9.2
+    helm.sh/chart: alloy-1.1.2
+  annotations:
+    meta.helm.sh/release-name: apap-alloy
+    meta.helm.sh/release-namespace: grafana-stack-qa
+  managedFields:
+    - manager: helm
+      operation: Update
+      apiVersion: v1
+      time: '2025-07-18T18:24:12Z'
+      fieldsType: FieldsV1
+      fieldsV1:
+        'f:data': {}
+        'f:metadata':
+          'f:annotations':
+            .: {}
+            'f:meta.helm.sh/release-name': {}
+            'f:meta.helm.sh/release-namespace': {}
+          'f:labels':
+            .: {}
+            'f:app.kubernetes.io/component': {}
+            'f:app.kubernetes.io/instance': {}
+            'f:app.kubernetes.io/managed-by': {}
+            'f:app.kubernetes.io/name': {}
+            'f:app.kubernetes.io/part-of': {}
+            'f:app.kubernetes.io/version': {}
+            'f:helm.sh/chart': {}
+    - manager: Mozilla
+      operation: Update
+      apiVersion: v1
+      time: '2025-08-28T16:10:57Z'
+      fieldsType: FieldsV1
+      fieldsV1:
+        'f:data':
+          'f:config.alloy': {}
+data:
+  config.alloy: |-
+    logging {
+      level  = "info"
+      format = "logfmt"
+    }
+
+    loki.write "default" {
+      endpoint {
+        url = "https://loki-aks-devqa.apap.com.do/loki/api/v1/push"
+
+        tls_config {
+          insecure_skip_verify = true
+        }
+
+        //min_backoff_period = "500ms"
+        //max_backoff_period = "5m"
+        //max_backoff_retries = 10
+      }
+
+      external_labels = {
+        "cluster"          = "ARO-DEVQA",
+        "k8s_cluster_name" = "ARO-DEVQA",
+      }
+    }
+
+    discovery.kubernetes "pod" {
+      role = "pod"
+    }
+
+    discovery.relabel "pod_logs" {
+      targets = discovery.kubernetes.pod.targets
+
+      // filtros iniciales
+      rule {
+        source_labels = ["__meta_kubernetes_namespace"]
+        action        = "drop"
+        regex         = "default|openshift-.*|monitoring"
+      }
+
+      rule {
+        source_labels = ["__meta_kubernetes_pod_name"]
+        action        = "replace"
+        target_label  = "pod"
+      }
+
+      rule {
+        source_labels = ["__meta_kubernetes_pod_container_name"]
+        action        = "replace"
+        target_label  = "container"
+      }
+
+      rule {
+        source_labels = ["__meta_kubernetes_pod_label_app_kubernetes_io_name"]
+        action        = "replace"
+        target_label  = "app_kubernetes_io_name"
+      }
+
+      rule {
+        source_labels = ["__meta_kubernetes_pod_node_name"]
+        action        = "replace"
+        target_label  = "k8s_node_name"
+        regex         = "([^-]*)-.*"
+        replacement   = "$1"
+      }
+
+      rule {
+        source_labels = ["__meta_kubernetes_namespace"]
+        action        = "replace"
+        target_label  = "namespace"
+      }
+
+      // convertir labels y annotations en Loki labels
+      rule {
+        action = "labelmap"
+        regex  = "__meta_kubernetes_pod_label_(.+)"
+      }
+
+      rule {
+        action = "labelmap"
+        regex  = "__meta_kubernetes_pod_annotation_(.+)"
+      }
+
+      // normalizar service_name
+      rule {
+        action = "replace"
+        source_labels = [
+          "__meta_kubernetes_pod_annotation_resource_opentelemetry_io_service_name",
+          "__meta_kubernetes_pod_label_app_kubernetes_io_name",
+          "__meta_kubernetes_pod_container_name",
+        ]
+        separator   = ";"
+        regex       = "^(?:;*)?([^;]+).*$"
+        replacement = "$1"
+        target_label = "service_name"
+      }
+
+      // normalizar service_namespace
+      rule {
+        action = "replace"
+        source_labels = [
+          "__meta_kubernetes_pod_annotation_resource_opentelemetry_io_service_namespace",
+          "namespace",
+        ]
+        separator   = ";"
+        regex       = "^(?:;*)?([^;]+).*$"
+        replacement = "$1"
+        target_label = "service_namespace"
+      }
+
+      // normalizar service_instance_id
+      rule {
+        source_labels = ["__meta_kubernetes_pod_annotation_resource_opentelemetry_io_service_instance_id"]
+        target_label  = "service_instance_id"
+      }
+
+      rule {
+        source_labels = ["service_instance_id", "namespace", "pod", "container"]
+        separator = "."
+        regex = "^\\.([^.]+\\.[^.]+\\.[^.]+)$"
+        target_label = "service_instance_id"
+      }
+
+      rule {
+        source_labels = ["__meta_kubernetes_pod_uid", "__meta_kubernetes_pod_container_name"]
+        action        = "replace"
+        target_label  = "__path__"
+        separator     = "/"
+        replacement   = "/var/log/pods/*$1/*.log"
+      }
+    }
+
+    loki.process "process_logs" {
+      stage.json {
+        expressions = {
+          trace_id = "traceid",
+          span_id  = "spanid",
+        }
+      }
+
+      stage.multiline {
+        firstline     = "^\\{"
+        max_lines     = 50
+        max_wait_time = "10s"
+      }
+
+      stage.label_keep {
+        values = [
+          "__tenant_id__","app_kubernetes_io_name","container","instance","job",
+          "level","namespace","service_name","service_namespace","service_instance_id",
+          "deployment_environment","deployment_environment_name","k8s_namespace_name",
+          "k8s_deployment_name","k8s_statefulset_name","k8s_daemonset_name","k8s_cronjob_name",
+          "k8s_job_name","k8s_node_name",
+        ]
+      }
+
+      forward_to = [loki.write.default.receiver]
+    }
+
+    loki.source.kubernetes "pod_logs" {
+      targets    = discovery.relabel.pod_logs.output
+      forward_to = [loki.process.process_logs.receiver]
+    }

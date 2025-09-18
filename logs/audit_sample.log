@@ -1,258 +1,58 @@
 {
-   "timestamp":"2024-07-24T12:01:00.000Z",
-   "severity":"INFO",
-   "message":"User login event recorded",
-   "log.type":"audit",
-   "resource":{
-      "service.name":"auth_service",
-      "service.module":"LoginController",
-      "service.instance.id":"instance-3",
-      "service.version":"2.1.0",
-      "service.domain":"Autenticacion",
-      "host.name":"auth-node-01"
-   },
-   "attributes":{
-      "action":"inicio_sesion",
-      "action.category":"autenticacion",
-      "result":"exitoso",
-      "user.id":"usr-5678",
-      "user.name":"jdoe",
-      "user.role":"cliente",
-      "auth.type":"password",
-      "ip.origin":"203.0.113.45",
-      "device.origin":"Pixel7-AndroidApp",
-      "location.origin":"AR",
-      "user.agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36",
-      "ip.destination":"192.168.10.15",
-      "device.destination":"auth-node-01",
-      "location.destination":"AR"
-   },
-   "trace_context":{
-      "trace_id":"3f4988f9-99ad-49f6-8add-522030b7f580",
-      "originator_intent":"AUTENTICACION_USUARIO"
-   }
-}{
-   "timestamp":"2024-07-24T12:30:00.000Z",
-   "severity":"INFO",
-   "message":"User logout event recorded",
-   "log.type":"audit",
-   "resource":{
-      "service.name":"auth_service",
-      "service.module":"SessionController",
-      "service.instance.id":"instance-2",
-      "service.version":"2.1.0",
-      "service.domain":"Autenticacion",
-      "host.name":"auth-node-02"
-   },
-   "attributes":{
-      "action":"logout",
-      "action.category":"autenticacion",
-      "result":"exitoso",
-      "user.id":"usr-5678",
-      "user.name":"jdoe",
-      "user.role":"cliente",
-      "auth.type":"token",
-      "ip.origin":"203.0.113.45",
-      "device.origin":"Pixel7-AndroidApp",
-      "location.origin":"AR",
-      "user.agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36",
-      "ip.destination":"192.168.10.15",
-      "device.destination":"auth-node-02",
-      "location.destination":"AR"
-   },
-   "trace_context":{
-      "trace_id":"2d4c2b9f-8ef1-4c1f-8dd3-1f4d6a11a123",
-      "originator_intent":"CIERRE_SESION_USUARIO"
-   }
-}{
-   "timestamp":"2024-07-24T13:00:00.000Z",
-   "severity":"WARNING",
-   "message":"Privilege escalation event detected",
-   "log.type":"audit",
-   "resource":{
-      "service.name":"admin_service",
-      "service.module":"RoleManager",
-      "service.instance.id":"instance-5",
-      "service.version":"3.0.0",
-      "service.domain":"Seguridad",
-      "host.name":"sec-node-01"
-   },
-   "attributes":{
-      "action":"privilege_escalation",
-      "action.category":"seguridad",
-      "result":"exitoso",
-      "user.id":"usr-1122",
-      "user.name":"mlopez",
-      "user.role":"admin",
-      "auth.type":"oauth",
-      "ip.origin":"198.51.100.23",
-      "device.origin":"Win10-Workstation",
-      "location.origin":"CL",
-      "user.agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
-      "ip.destination":"192.168.20.30",
-      "device.destination":"sec-node-01",
-      "location.destination":"CL"
-   },
-   "trace_context":{
-      "trace_id":"1a5b8c3d-9f9e-48b1-9afc-3c887612b999",
-      "originator_intent":"ELEVACION_PRIVILEGIOS"
-   }
-}{
-   "timestamp":"2024-07-24T13:30:00.000Z",
-   "severity":"INFO",
-   "message":"MFA challenge issued",
-   "log.type":"audit",
-   "resource":{
-      "service.name":"auth_service",
-      "service.module":"MFAController",
-      "service.instance.id":"instance-4",
-      "service.version":"2.1.0",
-      "service.domain":"Autenticacion",
-      "host.name":"auth-node-03"
-   },
-   "attributes":{
-      "action":"mfa_challenge",
-      "action.category":"autenticacion",
-      "result":"exitoso",
-      "user.id":"usr-5678",
-      "user.name":"jdoe",
-      "user.role":"cliente",
-      "auth.type":"mfa",
-      "ip.origin":"203.0.113.45",
-      "device.origin":"Pixel7-AndroidApp",
-      "location.origin":"AR",
-      "user.agent":"okhttp/4.9.1 (Android)",
-      "ip.destination":"192.168.10.15",
-      "device.destination":"auth-node-03",
-      "location.destination":"AR"
-   },
-   "trace_context":{
-      "trace_id":"4f2d8d8b-4459-4c77-88e6-f52c8c45f111",
-      "originator_intent":"MFA_VERIFICACION"
-   }
-}{
-   "timestamp":"2024-07-24T14:00:00.000Z",
-   "severity":"CRITICAL",
-   "message":"Sensitive data access detected",
-   "log.type":"audit",
-   "resource":{
-      "service.name":"core_banking_service",
-      "service.module":"CustomerDataController",
-      "service.instance.id":"instance-7",
-      "service.version":"5.4.2",
-      "service.domain":"Clientes",
-      "host.name":"data-node-01"
-   },
-   "attributes":{
-      "action":"sensitive_data_access",
-      "action.category":"seguridad",
-      "result":"exitoso",
-      "user.id":"usr-2233",
-      "user.name":"pperez",
-      "user.role":"analista",
-      "auth.type":"oauth",
-      "ip.origin":"198.51.100.77",
-      "device.origin":"MacOS-Workstation",
-      "location.origin":"UY",
-      "user.agent":"PostmanRuntime/7.32.2",
-      "ip.destination":"192.168.30.10",
-      "device.destination":"data-node-01",
-      "location.destination":"UY"
-   },
-   "trace_context":{
-      "trace_id":"7d1a2c5e-2c4f-4f0f-9af1-3ab9234d4123",
-      "originator_intent":"ACCESO_DATOS_SENSIBLES"
-   }
-}{
-   "timestamp":"2024-07-24T12:01:00.000Z",
-   "severity":"INFO",
-   "message":"Handling incoming HTTP request",
-   "log.type":"application",
-   "resource":{
-      "service.name":"my\\_service",
-      "service.module":"CustomerController",
-      "service.instance.id":"instance-1",
-      "service.version":"1.0.0",
-      "service.domain":"Clientes",
-      "host.name":"hostname"
-   },
-   "attributes":{
-      "http.method":"GET",
-      "http.url":"https://example.com/api/users",
-      "http.target":"/api/users",
-      "http.host":"example.com",
-      "http.scheme":"https",
-      "http.status\\_code":200,
-      "net.peer.ip":"192.168.1.100",
-      "net.peer.port":443,
-      "http.user\\_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
-      "http.request\\_duration":"33",
-      "http.headers":{
-         "Content-type":"application/json"
-      }
-   },
-   "trace_context":{
-      "trace_id":"3f4988f9-99ad-49f6-8add-522030b7f580",
-      "originator_intent":"CONSULTA_USUARIO"
-   }
-}{
-   "timestamp":"2024-07-24T12:00:00.000Z",
-   "severity":"DEBUG",
-   "message":"Executing database query",
-   "log.type":"application",
-   "resource":{
-      "service.name":"my_service",
-      "service.module":"CustomerRepository",
-      "service.instance.id":"instance-1",
-      "service.version":"1.0.0",
-      "service.domain":"Clientes",
-      "host.name":"hostname"
-   },
-   "attributes":{
-      "db.system":"postgresql",
-      "db.host":"srvdb99.apap.com.do",
-      "db.port":"5432",
-      "db.name":"mydb",
-      "db.statement":"SELECT \\* FROM users WHERE id = $1",
-      "db.operation":"SELECT",
-      "db.user":"dbuser",
-      "db.sql.table":"user"
-   },
-   "trace_context":{
-      "trace_id":"3f4988f9-99ad-49f6-8add-522030b7f580",
-      "originator_intent":"CONSULTA_EN_DB"
-   }
-}{
-   "timestamp":"2024-07-30T12:35:01.123Z",
-   "severity":"DEBUG",
-   "message":"Message sent to queue",
-   "log.type":"application",
-   "resource":{
-      "service.name":"my-queue-service",
-      "service.module":"CustomerController",
-      "service.instance.id":"instance-456",
-      "service.version":"2.1.0",
-      "service.domain":"Clientes",
-      "host.name":"queue-host"
-   },
-   "attributes":{
-      "event.name":"UserSignup",
-      "event.domain":"clientes",
-      "event.timestamp":"2024-07-30T12:35:30.000Z",
-      "event.id":"event-001",
-      "event.data":{
-         "userId":"user-123",
-         "email":"user@example.com",
-         "messaging.system":"rabbitmq",
-         "messaging.destination":"my-queue",
-         "messaging.destination\\_kind":"queue",
-         "messaging.protocol":"AMQP",
-         "messaging.protocol\\_version":"0.9.1",
-         "messaging.url":"amqp://rabbitmq-host",
-         "messaging.operation":"send"
-      },
-      "trace_context":{
-         "trace_id":"3f4988f9-99ad-49f6-8add-522030b7f580",
-         "originator_intent":"CREACION_CLIENTE"
-      }
-   }
+  "timestamp": "2024-08-01T10:15:30.123Z",
+  "severity": "ERROR",
+  "message": "Unhandled exception in /api/users/42",
+  "log.type": "application",
+  "resource": {
+    "service.name": "users_service",
+    "service.module": "UserController",
+    "service.instance.id": "instance-app-1",
+    "service.version": "1.4.2",
+    "service.domain": "Usuarios",
+    "host.name": "app-node-01"
+  },
+  "attributes": {
+    "http.method": "GET",
+    "http.target": "/api/users/42",
+    "http.status_code": 500,
+    "exception.type": "NullPointerException",
+    "exception.message": "Object reference not set to an instance of an object",
+    "exception.stacktrace": "at com.example.UserController.getUser(UserController.java:87)"
+  },
+  "trace_context": {
+    "trace_id": "11111111-2222-3333-4444-555555555555",
+    "originator_intent": "GET_USER_BY_ID"
+  }
+}
+
+{
+  "timestamp": "2024-08-01T10:16:05.456Z",
+  "severity": "ERROR",
+  "message": "Unauthorized access attempt blocked",
+  "log.type": "audit",
+  "resource": {
+    "service.name": "auth_service",
+    "service.module": "AuthFilter",
+    "service.instance.id": "instance-auth-2",
+    "service.version": "2.3.0",
+    "service.domain": "Seguridad",
+    "host.name": "auth-node-02"
+  },
+  "attributes": {
+    "action": "access_blocked",
+    "action.category": "seguridad",
+    "result": "fallido",
+    "user.id": "usr-9999",
+    "user.name": "unknown",
+    "user.role": "desconocido",
+    "auth.type": "bearer",
+    "ip.origin": "203.0.113.99",
+    "device.origin": "Unknown-Client",
+    "location.origin": "AR",
+    "reason": "missing or invalid token"
+  },
+  "trace_context": {
+    "trace_id": "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+    "originator_intent": "ACCESO_NO_AUTORIZADO"
+  }
+}

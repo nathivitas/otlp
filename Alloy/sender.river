@@ -1,119 +1,44 @@
-// ==============================
-// Read & parse audit-capable logs
-// ==============================
-otelcol.receiver.filelog "audit" {
+otelcol.receiver.filelog "audit_only" {
   include  = ["/data/app.log"]
   start_at = "beginning"
 
+  // Recombine pretty-printed JSON objects
+  multiline {
+    line_start_pattern = "^\\s*\\{"
+  }
+
   operators = [
-    // Recombine pretty-printed JSON objects (one log entry per {...})
+    // 0) Early filter on raw body. 'filter' DROPS when expr == true,
+    // so we negate the "is audit" match to keep only audit.
     {
-      type              = "recombine",
-      combine_field     = "body",
-      // IMPORTANT: only one of is_first_entry or is_last_entry may be set.
-      // Your file prints '{' on its own line for each object start.
-      is_first_entry    = "body matches '^[[:space:]]*{[[:space:]]*$'",
-      // Use the actual attribute that exists in your entries:
-      // (debug tap shows log.file.name, not log.file.path)
-      source_identifier = "attributes[\"log.file.name\"]",
+      type    = "filter",
+      expr    = `!(body matches "(?s)\\\"log\\.type\\\"\\s*:\\s*\\\"audit\\\"")`,
+      on_error = "send",
     },
 
-    // Parse the stitched JSON into attributes
+    // 1) Parse JSON into body.*
+    { type = "json_parser", parse_from = "body", on_error = "send" },
+
+    // 2) Parse event time -> record timestamp (best-effort)
     {
-      type       = "json_parser",
-      parse_from = "body",
-      parse_to   = "attributes",
-      on_error   = "send",   // switch to "drop" after you verify it’s clean
+      type       = "time_parser",
+      parse_from = "body.timestamp",
+      layout     = "%Y-%m-%dT%H:%M:%S.%fZ",
+      location   = "UTC",
+      on_error   = "send",
     },
 
-    // Timestamp & severity
-    {
-      type        = "time_parser",
-      parse_from  = "attributes.timestamp",
-      layout_type = "gotime",
-      layout      = "2006-01-02T15:04:05.000Z07:00",
-    },
-    {
-      type       = "severity_parser",
-      parse_from = "attributes.severity",
-    },
-
-    // Put the human message into the log body
-    { type = "move", from = "attributes.message", to = "body", id = "move1" },
+    // 3) Parse severity (best-effort)
+    { type = "severity_parser", parse_from = "body.severity", on_error = "send" },
   ]
-
-  output { logs = [otelcol.processor.transform.shape.input] }
-}
-
-// ========================================
-// Shape into conventional OTLP-ish fields
-// (lift resource{} ⇒ resource.attributes)
-// ========================================
-otelcol.processor.transform "shape" {
-  error_mode = "ignore"
-
-  log_statements {
-    context = "log"
-    statements = [
-      // Promote resource.* to resource.attributes
-      "set(resource.attributes[\"service.name\"],        attributes[\"resource\"][\"service.name\"])        where attributes[\"resource\"][\"service.name\"] != nil",
-      "set(resource.attributes[\"service.module\"],      attributes[\"resource\"][\"service.module\"])      where attributes[\"resource\"][\"service.module\"] != nil",
-      "set(resource.attributes[\"service.instance.id\"], attributes[\"resource\"][\"service.instance.id\"]) where attributes[\"resource\"][\"service.instance.id\"] != nil",
-      "set(resource.attributes[\"service.version\"],     attributes[\"resource\"][\"service.version\"])     where attributes[\"resource\"][\"service.version\"] != nil",
-      "set(resource.attributes[\"service.domain\"],      attributes[\"resource\"][\"service.domain\"])      where attributes[\"resource\"][\"service.domain\"] != nil",
-      "set(resource.attributes[\"host.name\"],           attributes[\"resource\"][\"host.name\"])           where attributes[\"resource\"][\"host.name\"] != nil",
-
-      // Normalize nested {"log":{"type":"audit"}} to flat attributes["log.type"]
-      "set(attributes[\"log.type\"], attributes[\"log\"][\"type\"]) where attributes[\"log.type\"] == nil and attributes[\"log\"][\"type\"] != nil",
-
-      // Cleanup
-      "delete_key(attributes, \"resource\")",
-      "delete_key(attributes, \"trace_context\")",
-    ]
-  }
-
-  // Tee: inspect parsed records AND continue pipeline
-  output { 
-    logs = [
-      otelcol.exporter.debug.tap_after_shape.input,
-      otelcol.processor.filter.only_audit.input,
-    ]
-  }
-}
-
-// =====================================
-// Keep only audit entries (case-insens)
-// =====================================
-otelcol.processor.filter "only_audit" {
-  error_mode = "ignore"
-
-  logs {
-    // OTTL: TRUE => drop. We drop anything that's not audit.
-    log_record = [
-      `not IsMatch(attributes["log.type"], "(?i)^audit$")`,
-    ]
-  }
 
   output { logs = [otelcol.processor.batch.default.input] }
 }
 
-// ===================
-// Batch for efficiency
-// ===================
 otelcol.processor.batch "default" {
   output { logs = [otelcol.exporter.otlp.to_receiver.input] }
 }
 
-// =====================
-// Debug mirror (verbose)
-// =====================
-otelcol.exporter.debug "tap_after_shape" {
-  verbosity = "detailed"
-}
-
-// ===================================
-// Export to the in-pod OTLP receiver
-// ===================================
 otelcol.exporter.otlp "to_receiver" {
   client {
     endpoint = "receiver:4317"
