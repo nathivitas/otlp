@@ -1,6 +1,7 @@
 # OTLP Audit Logs PoC — Grafana Alloy (River)
 
 This PoC shows how to ingest **JSON audit logs** with **Grafana Alloy**, normalize them into **OTLP** (OpenTelemetry Logs) shape, and forward them to:
+
 - an **OTLP endpoint** (e.g., another collector/gateway), and/or
 - **Loki** (optional), while keeping Alloy’s web UI available for quick validation.
 
