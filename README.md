@@ -5,6 +5,7 @@ This PoC shows how to ingest **JSON audit logs** with **Grafana Alloy**, normali
 - **Loki** (optional), while keeping Alloy’s web UI available for quick validation.
 
 It includes:
+
 - Local, containerized setup (Podman) for rapid iteration.
 - River configs for a **sender** (filelog → OTLP) and a **receiver** (OTLP ingest).
 - A **Kubernetes integration** pattern that plugs into an existing Alloy deployment (via ConfigMap patch), including discovery-based file tailing.
